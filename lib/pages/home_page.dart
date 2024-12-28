@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:to_do_list_project/data/local_storage.dart';
 import 'package:to_do_list_project/main.dart';
+import 'package:to_do_list_project/widgets/custom_search_delegate.dart';
 import 'package:to_do_list_project/widgets/task_list_item.dart';
 
 import '../models/task_model.dart';
@@ -41,7 +42,9 @@ class _HomePageState extends State<HomePage> {
             )),
         centerTitle: false,
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+          IconButton(onPressed: () {
+            _showSearchPage();
+          }, icon: Icon(Icons.search)),
           IconButton(
               onPressed: () {
                 _showAddTaskBottomSheet(context);
@@ -86,30 +89,35 @@ class _HomePageState extends State<HomePage> {
     showModalBottomSheet(
         context: context,
         builder: (context) {
-          return Container(
-            // padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-            padding: EdgeInsets.only(bottom: 150),
+          return Padding(
+            padding: MediaQuery.of(context).viewInsets,
 
-            width: MediaQuery.of(context).size.width,
-            child: ListTile(
-              title: TextField(
-                style: TextStyle(fontSize: 24),
-                decoration: InputDecoration(
-                  hintText: 'Enter Your Task',
+           // padding: const EdgeInsets.all(8.0),
+            child: Container(
+              // padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+              padding: EdgeInsets.only(bottom: 150),
+
+              width: MediaQuery.of(context).size.width,
+              child: ListTile(
+                title: TextField(
+                  style: TextStyle(fontSize: 24),
+                  decoration: InputDecoration(
+                    hintText: 'Enter Your Task',
+                  ),
+                  onSubmitted: (value) {
+                    Navigator.of(context).pop();
+                    if (value.length > 3) {
+                      DatePicker.showTimePicker(context, showSecondsColumn: false,
+                          onConfirm: (time) async {
+                        var newAddTask =
+                            Task.create(name: value, createdAt: time);
+                        _allTask.add(newAddTask);
+                        await _localStorage.addTask(task: newAddTask);
+                        setState(() {});
+                      });
+                    }
+                  },
                 ),
-                onSubmitted: (value) {
-                  Navigator.of(context).pop();
-                  if (value.length > 3) {
-                    DatePicker.showTimePicker(context, showSecondsColumn: false,
-                        onConfirm: (time) async {
-                      var newAddTask =
-                          Task.create(name: value, createdAt: time);
-                      _allTask.add(newAddTask);
-                      await _localStorage.addTask(task: newAddTask);
-                      setState(() {});
-                    });
-                  }
-                },
               ),
             ),
           );
@@ -119,5 +127,10 @@ class _HomePageState extends State<HomePage> {
   void getAllTaskFromDb() async {
     _allTask = await _localStorage.getAllTask();
     setState(() {});
+  }
+
+  Future<void> _showSearchPage() async {
+   await showSearch(context: context, delegate: CustomSearchDelegate(allTasks: _allTask));
+   getAllTaskFromDb();
   }
 }

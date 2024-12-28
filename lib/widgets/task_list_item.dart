@@ -22,11 +22,12 @@ class _TaskListItemState extends State<TaskListItem> {
     // TODO: implement initState
     super.initState();
     _localStorage = locator<LocalStorage>();
-    _taskNameController.text = widget.task.name;
   }
 
   @override
   Widget build(BuildContext context) {
+    _taskNameController.text = widget.task.name;
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -66,6 +67,7 @@ class _TaskListItemState extends State<TaskListItem> {
             : TextField(
                 controller: _taskNameController,
                 decoration: InputDecoration(border: InputBorder.none),
+                textInputAction: TextInputAction.go,
                 minLines: 1,
                 maxLines: null,
                 onSubmitted: (newValue) {
@@ -76,7 +78,8 @@ class _TaskListItemState extends State<TaskListItem> {
                 },
               ),
         trailing: Text(
-          DateFormat('hh:mm a').format(widget.task.createdAt), style: TextStyle(fontSize: 14, color: Colors.grey),
+          DateFormat('hh:mm a').format(widget.task.createdAt),
+          style: TextStyle(fontSize: 14, color: Colors.grey),
         ),
       ),
     );
